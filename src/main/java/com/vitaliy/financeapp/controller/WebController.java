@@ -4,6 +4,9 @@ import com.vitaliy.financeapp.entity.Transaction;
 import com.vitaliy.financeapp.entity.User;
 import com.vitaliy.financeapp.repository.TransactionRepository;
 import com.vitaliy.financeapp.repository.UserRepository;
+import java.util.ArrayList;
+
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,7 +25,9 @@ public class WebController {
     public String home(@RequestParam(defaultValue = "1") Long userId, Model model) {
 
         User user = userRepository.findById(userId).orElseThrow();
-        List<Transaction> transactions = transactionRepository.findByUser(user);
+
+        List<Transaction> transactions =
+                transactionRepository.findByUserOrderByDateDescIdDesc(user);
 
         Double income = transactionRepository.getTotalIncome(user);
         Double expense = transactionRepository.getTotalExpense(user);
@@ -37,18 +42,27 @@ public class WebController {
         model.addAttribute("income", income);
         model.addAttribute("expense", expense);
         model.addAttribute("userId", userId);
-
+        model.addAttribute("categories", categories);
 
         return "index";
+    }
+
+    @PostMapping("/add-category")
+    public String addCategory(@RequestParam String newCategory) {
+
+        if (newCategory != null && !newCategory.isBlank()) {
+            categories.add(newCategory.toUpperCase());
+        }
+
+        return "redirect:/";
     }
 
     @PostMapping("/add")
     public String add(@RequestParam Long userId,
                       @RequestParam Double amount,
                       @RequestParam String type,
-                      @RequestParam String description,
-                      @RequestParam String category,
-                      @RequestParam String date) {
+                      @RequestParam(required = false) String description,
+                      @RequestParam String category) {
 
         User user = userRepository.findById(userId).orElseThrow();
 
@@ -57,11 +71,14 @@ public class WebController {
         t.setType(type);
         t.setDescription(description);
         t.setCategory(category);
-        t.setDate(java.time.LocalDate.parse(date));
+        t.setDate(java.time.LocalDateTime.now());
         t.setUser(user);
 
         transactionRepository.save(t);
 
         return "redirect:/?userId=" + userId;
     }
+    private List<String> categories = new ArrayList<>(
+            List.of("SALARY", "BONUS", "FREELANCE")
+    );
 }

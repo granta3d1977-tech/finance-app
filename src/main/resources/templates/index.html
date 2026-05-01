@@ -47,81 +47,271 @@
         .category-other {
             background: #dfe6e9;
         }
+
+        .clock {
+            width: 80px;
+            height: 80px;
+            border: 4px solid #333;
+            border-radius: 50%;
+            position: relative;
+            background: white;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            transform: translateX(-50%);
+        }
+
+        .hour {
+            width: 4px;
+            height: 20px;
+            background: black;
+        }
+
+        .minute {
+            width: 3px;
+            height: 28px;
+            background: black;
+        }
+
+        .second {
+            width: 2px;
+            height: 32px;
+            background: red;
+        }
+
+        .center-dot {
+            width: 6px;
+            height: 6px;
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .clock {
+            width: 100px;
+            height: 100px;
+            border: 5px solid #ccc;
+            border-radius: 50%;
+            position: relative;
+            background: #f8f8f8;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            transform: translateX(-50%);
+        }
+
+        .hour {
+            width: 4px;
+            height: 25px;
+            background: black;
+        }
+
+        .minute {
+            width: 3px;
+            height: 35px;
+            background: black;
+        }
+
+        .second {
+            width: 2px;
+            height: 40px;
+            background: orange;
+        }
+
+        .center-dot {
+            width: 8px;
+            height: 8px;
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* цифры */
+        .number {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .n12 { top: 5px; left: 50%; transform: translateX(-50%); }
+        .n3  { right: 5px; top: 50%; transform: translateY(-50%); }
+        .n6  { bottom: 5px; left: 50%; transform: translateX(-50%); }
+        .n9  { left: 5px; top: 50%; transform: translateY(-50%); }
     </style>
 </head>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        function updateClock() {
+            const now = new Date();
+
+            const sec = now.getSeconds();
+            const min = now.getMinutes();
+            const hour = now.getHours();
+
+            const secDeg = sec * 6;
+            const minDeg = min * 6;
+            const hourDeg = (hour % 12) * 30 + min * 0.5;
+
+            document.getElementById("second").style.transform =
+                `translateX(-50%) rotate(${secDeg}deg)`;
+
+            document.getElementById("minute").style.transform =
+                `translateX(-50%) rotate(${minDeg}deg)`;
+
+            document.getElementById("hour").style.transform =
+                `translateX(-50%) rotate(${hourDeg}deg)`;
+
+            // 📅 дата
+            const date = now.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            document.getElementById("date").innerText = date;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+    });
+</script>
+
 <body class="container py-4">
 
-<h2 class="mb-4">💰 Мои финансы</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>💰 Финансы</h2>
 
-<!-- Баланс -->
-<div class="row mb-4">
+    <div class="d-flex align-items-center gap-3">
+
+        <!-- 📅 дата -->
+        <div id="date" class="fw-bold"></div>
+
+        <!-- 🕐 часы -->
+        <div class="clock">
+            <div class="hand hour" id="hour"></div>
+            <div class="hand minute" id="minute"></div>
+            <div class="hand second" id="second"></div>
+            <div class="center-dot"></div>
+
+            <div class="number n12">12</div>
+            <div class="number n3">3</div>
+            <div class="number n6">6</div>
+            <div class="number n9">9</div>
+        </div>
+
+    </div>
+</div>
+
+<div class="row">
+
+    <!-- ДОХОД -->
     <div class="col-md-4">
         <div class="card p-3 shadow-sm">
+
+            <h5 class="text-success">Доход</h5>
+            <h3 th:text="${income}"></h3>
+
+            <!-- мини форма -->
+            <form method="post" action="/add" class="mt-3">
+                <input type="hidden" name="userId" th:value="${userId}"/>
+
+                <input class="form-control mb-2" type="number" name="amount" placeholder="Сумма" required>
+                <input type="hidden" name="type" value="INCOME">
+
+                <select class="form-select mb-2" name="category">
+                    <option value="SALARY">💰 Зарплата</option>
+                    <option value="BONUS">🎁 Бонус</option>
+                </select>
+
+
+                <input class="form-control mb-2" type="text" name="description" placeholder="Описание">
+
+                <button class="btn btn-success w-100">+ Добавить</button>
+            </form>
+
+            <hr>
+
+            <!-- список -->
+            <div th:each="t : ${transactions}">
+                <div th:if="${t.type == 'INCOME'}">
+                    <span th:text="${t.description}"></span>
+                    <span class="text-success" th:text="${t.amount}"></span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- БАЛАНС -->
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm text-center">
+
             <h5>Баланс</h5>
-            <h3 th:text="${balance}"></h3>
+            <h1 th:text="${balance}"></h1>
+
         </div>
     </div>
 
+    <!-- РАСХОД -->
     <div class="col-md-4">
         <div class="card p-3 shadow-sm">
-            <h6>Доход</h6>
-            <span class="income" th:text="${income}"></span>
+
+            <h5 class="text-danger">Расход</h5>
+            <h3 th:text="${expense}"></h3>
+
+            <!-- мини форма -->
+            <form method="post" action="/add" class="mt-3">
+                <input type="hidden" name="userId" th:value="${userId}"/>
+
+                <input class="form-control mb-2" type="number" name="amount" placeholder="Сумма" required>
+                <input type="hidden" name="type" value="EXPENSE">
+
+                <select class="form-select mb-2" name="category">
+                    <option value="FOOD">🍔 Еда</option>
+                    <option value="TRANSPORT">🚗 Транспорт</option>
+                </select>
+
+
+                <input class="form-control mb-2" type="text" name="description" placeholder="Описание">
+
+                <button class="btn btn-danger w-100">+ Добавить</button>
+            </form>
+
+            <hr>
+
+            <!-- список -->
+            <div th:each="t : ${transactions}">
+                <div th:if="${t.type == 'EXPENSE'}">
+                    <span th:text="${t.description}"></span>
+                    <span class="text-danger" th:text="${t.amount}"></span>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card p-3 shadow-sm">
-            <h6>Расход</h6>
-            <span class="expense" th:text="${expense}"></span>
-        </div>
-    </div>
 </div>
 
-<!-- Форма -->
-<div class="card p-3 mb-4 shadow-sm">
-    <h5>Добавить операцию</h5>
+<hr class="mt-5">
 
-    <form method="post" action="/add" class="row g-2">
-        <input type="hidden" name="userId" th:value="${userId}"/>
-
-        <div class="col-md-2">
-            <input class="form-control" type="number" step="0.01" name="amount" placeholder="Сумма" required>
-        </div>
-
-        <div class="col-md-2">
-            <select class="form-select" name="type">
-                <option value="INCOME">Доход</option>
-                <option value="EXPENSE">Расход</option>
-            </select>
-        </div>
-
-        <div class="col-md-2">
-            <select class="form-select" name="category">
-                <option value="FOOD">🍔 Еда</option>
-                <option value="TRANSPORT">🚗 Транспорт</option>
-                <option value="SALARY">💰 Зарплата</option>
-                <option value="OTHER">📦 Другое</option>
-            </select>
-        </div>
-
-        <div class="col-md-3">
-            <input class="form-control" type="text" name="description" placeholder="Описание">
-        </div>
-
-        <div class="col-md-2">
-            <input class="form-control" type="date" name="date" required>
-        </div>
-
-        <div class="col-md-1">
-            <button class="btn btn-primary w-100">+</button>
-        </div>
-    </form>
-</div>
-
-<!-- Таблица -->
-<div class="card p-3 shadow-sm">
-    <h5>Операции</h5>
+<div class="card p-3 shadow-sm mt-4">
+    <h5>📊 История операций</h5>
 
     <table class="table">
         <thead>
@@ -136,26 +326,19 @@
 
         <tbody>
         <tr th:each="t : ${transactions}">
-            <td th:text="${t.date}"></td>
+            <td th:text="${#temporals.format(t.date, 'dd.MM.yyyy HH:mm')}"></td>
             <td th:text="${t.description}"></td>
 
-            <!-- Категория -->
-            <td>
-                <span class="badge"
-                    th:text="${t.category != null ? t.category : 'OTHER'}"
-                    th:classappend="'category-' + ${(t.category != null ? t.category : 'OTHER').toLowerCase()}">
-                </span>
-            </td>
+            <td th:text="${t.category}"></td>
 
-            <!-- Тип -->
             <td>
                 <span th:text="${t.type}"
-                      th:classappend="${t.type == 'INCOME'} ? 'income' : 'expense'">
+                      th:classappend="${t.type == 'INCOME'} ? 'text-success' : 'text-danger'">
                 </span>
             </td>
 
-            <!-- Сумма -->
             <td th:text="${t.amount}"></td>
+
         </tr>
         </tbody>
     </table>
