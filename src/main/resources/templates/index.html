@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Finance App</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f6fa;
+        }
+
+        .card {
+            border-radius: 15px;
+        }
+
+        .income {
+            color: green;
+            font-weight: bold;
+        }
+
+        .expense {
+            color: red;
+            font-weight: bold;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 10px;
+            color: #000;
+        }
+
+        .category-food {
+            background: #ffeaa7;
+        }
+
+        .category-transport {
+            background: #81ecec;
+        }
+
+        .category-salary {
+            background: #55efc4;
+        }
+
+        .category-other {
+            background: #dfe6e9;
+        }
+    </style>
+</head>
+
+<body class="container py-4">
+
+<h2 class="mb-4">💰 Мои финансы</h2>
+
+<!-- Баланс -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+            <h5>Баланс</h5>
+            <h3 th:text="${balance}"></h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+            <h6>Доход</h6>
+            <span class="income" th:text="${income}"></span>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+            <h6>Расход</h6>
+            <span class="expense" th:text="${expense}"></span>
+        </div>
+    </div>
+</div>
+
+<!-- Форма -->
+<div class="card p-3 mb-4 shadow-sm">
+    <h5>Добавить операцию</h5>
+
+    <form method="post" action="/add" class="row g-2">
+        <input type="hidden" name="userId" th:value="${userId}"/>
+
+        <div class="col-md-2">
+            <input class="form-control" type="number" step="0.01" name="amount" placeholder="Сумма" required>
+        </div>
+
+        <div class="col-md-2">
+            <select class="form-select" name="type">
+                <option value="INCOME">Доход</option>
+                <option value="EXPENSE">Расход</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select class="form-select" name="category">
+                <option value="FOOD">🍔 Еда</option>
+                <option value="TRANSPORT">🚗 Транспорт</option>
+                <option value="SALARY">💰 Зарплата</option>
+                <option value="OTHER">📦 Другое</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <input class="form-control" type="text" name="description" placeholder="Описание">
+        </div>
+
+        <div class="col-md-2">
+            <input class="form-control" type="date" name="date" required>
+        </div>
+
+        <div class="col-md-1">
+            <button class="btn btn-primary w-100">+</button>
+        </div>
+    </form>
+</div>
+
+<!-- Таблица -->
+<div class="card p-3 shadow-sm">
+    <h5>Операции</h5>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Описание</th>
+            <th>Категория</th>
+            <th>Тип</th>
+            <th>Сумма</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="t : ${transactions}">
+            <td th:text="${t.date}"></td>
+            <td th:text="${t.description}"></td>
+
+            <!-- Категория -->
+            <td>
+                <span class="badge"
+                    th:text="${t.category != null ? t.category : 'OTHER'}"
+                    th:classappend="'category-' + ${(t.category != null ? t.category : 'OTHER').toLowerCase()}">
+                </span>
+            </td>
+
+            <!-- Тип -->
+            <td>
+                <span th:text="${t.type}"
+                      th:classappend="${t.type == 'INCOME'} ? 'income' : 'expense'">
+                </span>
+            </td>
+
+            <!-- Сумма -->
+            <td th:text="${t.amount}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
