@@ -23,6 +23,8 @@ public class Transaction {
 
     private LocalDateTime date;
 
+    private String wallet;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

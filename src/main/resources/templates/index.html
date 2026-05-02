@@ -4,95 +4,12 @@
     <meta charset="UTF-8">
     <title>Finance App</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        body {
-            background: #f5f6fa;
-        }
+        body { background: #f5f6fa; }
+        .card { border-radius: 15px; }
 
-        .card {
-            border-radius: 15px;
-        }
-
-        .income {
-            color: green;
-            font-weight: bold;
-        }
-
-        .expense {
-            color: red;
-            font-weight: bold;
-        }
-
-        .badge {
-            padding: 6px 10px;
-            border-radius: 10px;
-            color: #000;
-        }
-
-        .category-food {
-            background: #ffeaa7;
-        }
-
-        .category-transport {
-            background: #81ecec;
-        }
-
-        .category-salary {
-            background: #55efc4;
-        }
-
-        .category-other {
-            background: #dfe6e9;
-        }
-
-        .clock {
-            width: 80px;
-            height: 80px;
-            border: 4px solid #333;
-            border-radius: 50%;
-            position: relative;
-            background: white;
-        }
-
-        .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom;
-            transform: translateX(-50%);
-        }
-
-        .hour {
-            width: 4px;
-            height: 20px;
-            background: black;
-        }
-
-        .minute {
-            width: 3px;
-            height: 28px;
-            background: black;
-        }
-
-        .second {
-            width: 2px;
-            height: 32px;
-            background: red;
-        }
-
-        .center-dot {
-            width: 6px;
-            height: 6px;
-            background: black;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
         .clock {
             width: 100px;
             height: 100px;
@@ -110,23 +27,9 @@
             transform: translateX(-50%);
         }
 
-        .hour {
-            width: 4px;
-            height: 25px;
-            background: black;
-        }
-
-        .minute {
-            width: 3px;
-            height: 35px;
-            background: black;
-        }
-
-        .second {
-            width: 2px;
-            height: 40px;
-            background: orange;
-        }
+        .hour { width: 4px; height: 25px; background: black; }
+        .minute { width: 3px; height: 35px; background: black; }
+        .second { width: 2px; height: 40px; background: orange; }
 
         .center-dot {
             width: 8px;
@@ -139,7 +42,6 @@
             transform: translate(-50%, -50%);
         }
 
-        /* цифры */
         .number {
             position: absolute;
             font-size: 12px;
@@ -153,56 +55,15 @@
     </style>
 </head>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        function updateClock() {
-            const now = new Date();
-
-            const sec = now.getSeconds();
-            const min = now.getMinutes();
-            const hour = now.getHours();
-
-            const secDeg = sec * 6;
-            const minDeg = min * 6;
-            const hourDeg = (hour % 12) * 30 + min * 0.5;
-
-            document.getElementById("second").style.transform =
-                `translateX(-50%) rotate(${secDeg}deg)`;
-
-            document.getElementById("minute").style.transform =
-                `translateX(-50%) rotate(${minDeg}deg)`;
-
-            document.getElementById("hour").style.transform =
-                `translateX(-50%) rotate(${hourDeg}deg)`;
-
-            // 📅 дата
-            const date = now.toLocaleDateString('ru-RU', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-            });
-
-            document.getElementById("date").innerText = date;
-        }
-
-        setInterval(updateClock, 1000);
-        updateClock();
-
-    });
-</script>
-
 <body class="container py-4">
 
+<!-- ШАПКА -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>💰 Финансы</h2>
 
     <div class="d-flex align-items-center gap-3">
-
-        <!-- 📅 дата -->
         <div id="date" class="fw-bold"></div>
 
-        <!-- 🕐 часы -->
         <div class="clock">
             <div class="hand hour" id="hour"></div>
             <div class="hand minute" id="minute"></div>
@@ -214,7 +75,6 @@
             <div class="number n6">6</div>
             <div class="number n9">9</div>
         </div>
-
     </div>
 </div>
 
@@ -223,86 +83,73 @@
     <!-- ДОХОД -->
     <div class="col-md-4">
         <div class="card p-3 shadow-sm">
-
             <h5 class="text-success">Доход</h5>
             <h3 th:text="${income}"></h3>
 
-            <!-- мини форма -->
-            <form method="post" action="/add" class="mt-3">
+            <form method="post" action="/add">
                 <input type="hidden" name="userId" th:value="${userId}"/>
-
                 <input class="form-control mb-2" type="number" name="amount" placeholder="Сумма" required>
                 <input type="hidden" name="type" value="INCOME">
 
                 <select class="form-select mb-2" name="category">
-                    <option value="SALARY">💰 Зарплата</option>
-                    <option value="BONUS">🎁 Бонус</option>
+                    <option th:each="c : ${incomeCategories}" th:value="${c}" th:text="${c}"></option>
                 </select>
 
+                <select class="form-select mb-2" name="wallet">
+                    <option th:each="w : ${wallets}" th:value="${w}" th:text="${w}"></option>
+                </select>
 
-                <input class="form-control mb-2" type="text" name="description" placeholder="Описание">
+                <input class="form-control mb-2" name="description" placeholder="Описание">
 
                 <button class="btn btn-success w-100">+ Добавить</button>
             </form>
-
-            <hr>
-
-            <!-- список -->
-            <div th:each="t : ${transactions}">
-                <div th:if="${t.type == 'INCOME'}">
-                    <span th:text="${t.description}"></span>
-                    <span class="text-success" th:text="${t.amount}"></span>
-                </div>
-            </div>
-
         </div>
     </div>
 
     <!-- БАЛАНС -->
     <div class="col-md-4">
         <div class="card p-3 shadow-sm text-center">
-
             <h5>Баланс</h5>
             <h1 th:text="${balance}"></h1>
-
         </div>
+
+        <div class="mt-3" th:each="e : ${walletBalances}">
+            <div class="d-flex justify-content-between">
+                <span th:text="${e.key}"></span>
+                <strong th:text="${e.value}"></strong>
+            </div>
+        </div>
+
+        <form method="post" action="/add-wallet" class="d-flex gap-2 mt-3">
+            <input type="hidden" name="userId" th:value="${userId}"/>
+            <input type="text" name="wallet" class="form-control" placeholder="Новый кошелек" required>
+            <button class="btn btn-primary">+</button>
+        </form>
     </div>
 
     <!-- РАСХОД -->
     <div class="col-md-4">
         <div class="card p-3 shadow-sm">
-
             <h5 class="text-danger">Расход</h5>
             <h3 th:text="${expense}"></h3>
 
-            <!-- мини форма -->
-            <form method="post" action="/add" class="mt-3">
+            <form method="post" action="/add">
                 <input type="hidden" name="userId" th:value="${userId}"/>
-
                 <input class="form-control mb-2" type="number" name="amount" placeholder="Сумма" required>
                 <input type="hidden" name="type" value="EXPENSE">
 
                 <select class="form-select mb-2" name="category">
-                    <option value="FOOD">🍔 Еда</option>
-                    <option value="TRANSPORT">🚗 Транспорт</option>
+                    <option th:each="c : ${expenseCategories}" th:value="${c}" th:text="${c}"></option>
                 </select>
 
+                <select class="form-select mb-2" name="wallet">
+                    <option th:each="w : ${wallets}" th:value="${w}" th:text="${w}"></option>
+                </select>
 
-                <input class="form-control mb-2" type="text" name="description" placeholder="Описание">
+                <input class="form-control mb-2" name="description" placeholder="Описание">
 
                 <button class="btn btn-danger w-100">+ Добавить</button>
             </form>
-
-            <hr>
-
-            <!-- список -->
-            <div th:each="t : ${transactions}">
-                <div th:if="${t.type == 'EXPENSE'}">
-                    <span th:text="${t.description}"></span>
-                    <span class="text-danger" th:text="${t.amount}"></span>
-                </div>
-            </div>
-
         </div>
     </div>
 
@@ -310,10 +157,11 @@
 
 <hr class="mt-5">
 
-<div class="card p-3 shadow-sm mt-4">
+<!-- ИСТОРИЯ -->
+<div class="card p-3 shadow-sm">
     <h5>📊 История операций</h5>
 
-    <table class="table">
+    <table class="table table-striped">
         <thead>
         <tr>
             <th>Дата</th>
@@ -321,6 +169,7 @@
             <th>Категория</th>
             <th>Тип</th>
             <th>Сумма</th>
+            <th>Кошелек</th>
         </tr>
         </thead>
 
@@ -328,21 +177,41 @@
         <tr th:each="t : ${transactions}">
             <td th:text="${#temporals.format(t.date, 'dd.MM.yyyy HH:mm')}"></td>
             <td th:text="${t.description}"></td>
-
             <td th:text="${t.category}"></td>
-
-            <td>
-                <span th:text="${t.type}"
-                      th:classappend="${t.type == 'INCOME'} ? 'text-success' : 'text-danger'">
-                </span>
-            </td>
-
+            <td th:text="${t.type}"
+                th:classappend="${t.type == 'INCOME'} ? 'text-success' : 'text-danger'"></td>
             <td th:text="${t.amount}"></td>
-
+            <td th:text="${t.wallet}"></td>
         </tr>
         </tbody>
     </table>
 </div>
+
+<!-- ЧАСЫ -->
+<script>
+    function updateClock() {
+        const now = new Date();
+
+        const sec = now.getSeconds();
+        const min = now.getMinutes();
+        const hour = now.getHours();
+
+        document.getElementById("second").style.transform =
+            `translateX(-50%) rotate(${sec * 6}deg)`;
+
+        document.getElementById("minute").style.transform =
+            `translateX(-50%) rotate(${min * 6}deg)`;
+
+        document.getElementById("hour").style.transform =
+            `translateX(-50%) rotate(${(hour % 12) * 30 + min * 0.5}deg)`;
+
+        document.getElementById("date").innerText =
+            now.toLocaleDateString('ru-RU');
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
 
 </body>
 </html>
