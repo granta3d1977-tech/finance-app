@@ -5,8 +5,8 @@ import com.vitaliy.financeapp.entity.User;
 import com.vitaliy.financeapp.repository.TransactionRepository;
 import com.vitaliy.financeapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -25,6 +25,19 @@ public class TransactionController {
         transaction.setUser(user);
 
         return transactionRepository.save(transaction);
+    }
+
+    @PostMapping("/add")
+    public String add(Transaction transaction, Authentication authentication) {
+
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+
+        transaction.setUser(user);
+
+        transactionRepository.save(transaction);
+
+        return "redirect:/";
     }
 
     @GetMapping
@@ -48,6 +61,11 @@ public class TransactionController {
 
         return "Balance: " + balance +
                 " (income=" + income + ", expense=" + expense + ")";
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<Transaction> getByUser(@PathVariable Long userId) {
+        return transactionRepository.findByUserId(userId);
     }
 
 }

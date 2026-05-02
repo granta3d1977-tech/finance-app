@@ -4,26 +4,43 @@ import com.vitaliy.financeapp.entity.User;
 import com.vitaliy.financeapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/auth")
+@Controller
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @PostMapping("/login")
-    public String login(@RequestBody User request) {
+    @GetMapping("/login")
+    public String login(Model model) {
+        model.addAttribute("users", userRepository.findAll());
+        return "login";
+    }
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    // открыть страницу регистрации
+    @GetMapping("/register")
+    public String showRegister(Model model) {
+        model.addAttribute("user", new User());
+        return "register";
+    }
 
-        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            return "Login successful";
-        } else {
-            throw new RuntimeException("Invalid password");
+    // обработка формы
+    @PostMapping("/register")
+    public String register(@ModelAttribute User user) {
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // по умолчанию обычный пользователь
+        if (user.getRole() == null || user.getRole().isBlank()) {
+            user.setRole("ROLE_USER");
         }
+
+        userRepository.save(user);
+
+        return "redirect:/login";
     }
 }

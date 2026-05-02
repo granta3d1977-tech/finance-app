@@ -1,0 +1,59 @@
+.clock {
+    width: 100px;
+    height: 100px;
+    border: 4px solid #ccc;
+    border-radius: 50%;
+    position: relative;
+    background: white;
+}
+
+/* стрелки */
+.hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform-origin: bottom center;
+}
+
+/* разные стрелки */
+.hour {
+    width: 4px;
+    height: 25px;
+    background: black;
+}
+
+.minute {
+    width: 3px;
+    height: 35px;
+    background: black;
+}
+
+.second {
+    width: 2px;
+    height: 40px;
+    background: orange;
+}
+
+/* центр */
+.center-dot {
+    width: 8px;
+    height: 8px;
+    background: black;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* цифры */
+.number {
+    position: absolute;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.n12 { top: 5px; left: 50%; transform: translateX(-50%); }
+.n3  { right: 5px; top: 50%; transform: translateY(-50%); }
+.n6  { bottom: 5px; left: 50%; transform: translateX(-50%); }
+.n9  { left: 5px; top: 50%; transform: translateY(-50%); }

@@ -1,0 +1,47 @@
+<div th:fragment="header">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <!-- ЛЕВАЯ ЧАСТЬ -->
+        <div class="d-flex align-items-center gap-3">
+            <h2 class="m-0">💰 Финансы</h2>
+
+            <!-- 👤 имя пользователя -->
+            <span class="fw-bold text-primary"
+                  th:text="${#authentication.name}">
+                username
+            </span>
+
+            <!-- 🚪 logout -->
+            <form method="post" action="/logout">
+                <button class="btn btn-outline-danger btn-sm">
+                    Выйти
+                </button>
+            </form>
+        </div>
+
+
+        <!-- ПРАВАЯ ЧАСТЬ -->
+        <div class="d-flex align-items-center gap-3">
+
+            <!-- 📅 дата -->
+            <div id="date" class="fw-bold"></div>
+
+            <!-- 🕒 часы -->
+            <div class="clock">
+                <div class="hand hour" id="hour"></div>
+                <div class="hand minute" id="minute"></div>
+                <div class="hand second" id="second"></div>
+                <div class="center-dot"></div>
+
+                <div class="number n12">12</div>
+                <div class="number n3">3</div>
+                <div class="number n6">6</div>
+                <div class="number n9">9</div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

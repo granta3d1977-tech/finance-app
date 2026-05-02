@@ -3,6 +3,8 @@ package com.vitaliy.financeapp.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+//import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "transactions")
@@ -27,5 +29,6 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+
     private User user;
 }

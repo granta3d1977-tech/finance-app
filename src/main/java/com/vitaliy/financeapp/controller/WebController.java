@@ -1,17 +1,19 @@
 package com.vitaliy.financeapp.controller;
 
+import lombok.RequiredArgsConstructor;
+
 import com.vitaliy.financeapp.entity.Transaction;
 import com.vitaliy.financeapp.entity.User;
 import com.vitaliy.financeapp.repository.TransactionRepository;
 import com.vitaliy.financeapp.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Controller
@@ -20,60 +22,41 @@ public class WebController {
 
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    private final List<String> incomeCategories = new ArrayList<>(
-            List.of("SALARY", "BONUS", "FREELANCE")
-    );
+    private final List<String> incomeCategories = List.of("SALARY", "BONUS", "FREELANCE");
+    private final List<String> expenseCategories = List.of("FOOD", "TRANSPORT", "SHOPPING", "OTHER");
 
-    private final List<String> expenseCategories = new ArrayList<>(
-            List.of("FOOD", "TRANSPORT", "SHOPPING", "OTHER")
-    );
-
-    // в памяти (для простоты)
-    private static final List<String> wallets = new ArrayList<>(
-            List.of("CARD", "CASH")
-    );
+    private static final List<String> wallets = new ArrayList<>(List.of("CARD", "CASH"));
 
     @GetMapping("/")
-    public String home(@RequestParam(defaultValue = "1") Long userId,
-                       @RequestParam(required = false) String from,
-                       @RequestParam(required = false) String to,
-                       @RequestParam(required = false) String filter,
-                       Model model) {
+    public String home(Model model, Authentication authentication) {
 
-        User user = userRepository.findById(userId).orElseThrow();
+        // 🔐 текущий пользователь
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
 
-        LocalDate today = LocalDate.now();
-        LocalDate defaultFrom = today.withDayOfMonth(1);
-        LocalDate defaultTo = today.withDayOfMonth(today.lengthOfMonth());
-
-        if (filter == null) {
-            from = defaultFrom.toString();
-            to = defaultTo.toString();
-        } else {
-            from = parseDateOrDefault(from, defaultFrom).toString();
-            to = parseDateOrDefault(to, defaultTo).toString();
-        }
-
-        LocalDate parsedFrom = LocalDate.parse(from);
-        LocalDate parsedTo = LocalDate.parse(to);
-        if (parsedFrom.isAfter(parsedTo)) {
-            LocalDate temp = parsedFrom;
-            parsedFrom = parsedTo;
-            parsedTo = temp;
-        }
-
+        // 📊 только его транзакции
         List<Transaction> transactions =
                 transactionRepository.findByUserOrderByDateDescIdDesc(user);
 
         Double income = transactionRepository.getTotalIncome(user);
         Double expense = transactionRepository.getTotalExpense(user);
+
+        if (income == null) income = 0.0;
+        if (expense == null) expense = 0.0;
+
         double balance = income - expense;
 
+        // 👉 баланс по кошелькам
         Map<String, Double> walletBalances = new LinkedHashMap<>();
         for (String w : wallets) {
             Double inc = transactionRepository.getTotalIncomeByWallet(user, w);
             Double exp = transactionRepository.getTotalExpenseByWallet(user, w);
+
+            if (inc == null) inc = 0.0;
+            if (exp == null) exp = 0.0;
+
             walletBalances.put(w, inc - exp);
         }
 
@@ -83,10 +66,6 @@ public class WebController {
         model.addAttribute("expense", expense);
         model.addAttribute("walletBalances", walletBalances);
 
-        model.addAttribute("from", from);
-        model.addAttribute("to", to);
-
-        model.addAttribute("userId", userId);
         model.addAttribute("incomeCategories", incomeCategories);
         model.addAttribute("expenseCategories", expenseCategories);
         model.addAttribute("wallets", wallets);
@@ -95,26 +74,25 @@ public class WebController {
     }
 
     @PostMapping("/add-wallet")
-    public String addWallet(@RequestParam String wallet,
-                            @RequestParam Long userId) {
+    public String addWallet(@RequestParam String wallet) {
 
-        String normalizedWallet = wallet.trim().toUpperCase();
-        if (!normalizedWallet.isBlank() && !wallets.contains(normalizedWallet)) {
-            wallets.add(normalizedWallet);
+        String normalized = wallet.trim().toUpperCase();
+        if (!normalized.isBlank() && !wallets.contains(normalized)) {
+            wallets.add(normalized);
         }
 
-        return "redirect:/?userId=" + userId;
+        return "redirect:/";
     }
 
     @PostMapping("/add")
-    public String add(@RequestParam Long userId,
-                      @RequestParam Double amount,
+    public String add(@RequestParam Double amount,
                       @RequestParam String type,
                       @RequestParam(required = false) String description,
                       @RequestParam String wallet,
-                      @RequestParam String category) {
+                      @RequestParam String category,
+                      Authentication auth) {
 
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = userRepository.findByUsername(auth.getName()).orElseThrow();
 
         Transaction t = new Transaction();
         t.setAmount(amount);
@@ -127,17 +105,7 @@ public class WebController {
 
         transactionRepository.save(t);
 
-        return "redirect:/?userId=" + userId;
+        return "redirect:/";
     }
 
-    private LocalDate parseDateOrDefault(String value, LocalDate defaultValue) {
-        if (value == null || value.isBlank()) {
-            return defaultValue;
-        }
-        try {
-            return LocalDate.parse(value);
-        } catch (DateTimeParseException ex) {
-            return defaultValue;
-        }
-    }
 }

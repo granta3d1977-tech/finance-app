@@ -16,9 +16,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findByUserOrderByDateDescIdDesc(User user);
 
-//    List<Transaction> findByUserAndDateBetweenOrderByDateDescIdDesc(
-//            User user, LocalDateTime from, LocalDateTime to
-//    );
+    List<Transaction> findByUserId(Long userId);
+
 
     // 📊 ОБЩИЕ СУММЫ
     @Query("""

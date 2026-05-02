@@ -1,20 +1,31 @@
 package com.vitaliy.financeapp.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+
 
 @Entity
+@Getter
+@Setter
 @Table(name = "users")
-@Data
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
     private String username;
-
-    @Column(nullable = false)
+    @JsonIgnore
     private String password;
+
+    private String role; // FATHER / MOTHER / DAUGHTER
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Transaction> transactions;
+
 }

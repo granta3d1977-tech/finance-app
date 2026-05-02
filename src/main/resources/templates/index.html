@@ -6,77 +6,14 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        body { background: #f5f6fa; }
-        .card { border-radius: 15px; }
-
-        .clock {
-            width: 100px;
-            height: 100px;
-            border: 5px solid #ccc;
-            border-radius: 50%;
-            position: relative;
-            background: #f8f8f8;
-        }
-
-        .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom;
-            transform: translateX(-50%);
-        }
-
-        .hour { width: 4px; height: 25px; background: black; }
-        .minute { width: 3px; height: 35px; background: black; }
-        .second { width: 2px; height: 40px; background: orange; }
-
-        .center-dot {
-            width: 8px;
-            height: 8px;
-            background: black;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .number {
-            position: absolute;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .n12 { top: 5px; left: 50%; transform: translateX(-50%); }
-        .n3  { right: 5px; top: 50%; transform: translateY(-50%); }
-        .n6  { bottom: 5px; left: 50%; transform: translateX(-50%); }
-        .n9  { left: 5px; top: 50%; transform: translateY(-50%); }
-    </style>
+    <!-- 👉 подключаем стили header -->
+    <link rel="stylesheet" th:href="@{/css/header.css}">
 </head>
 
 <body class="container py-4">
 
-<!-- ШАПКА -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>💰 Финансы</h2>
-
-    <div class="d-flex align-items-center gap-3">
-        <div id="date" class="fw-bold"></div>
-
-        <div class="clock">
-            <div class="hand hour" id="hour"></div>
-            <div class="hand minute" id="minute"></div>
-            <div class="hand second" id="second"></div>
-            <div class="center-dot"></div>
-
-            <div class="number n12">12</div>
-            <div class="number n3">3</div>
-            <div class="number n6">6</div>
-            <div class="number n9">9</div>
-        </div>
-    </div>
-</div>
+<!-- 👉 подключаем header -->
+<div th:replace="fragments/header :: header"></div>
 
 <div class="row">
 
@@ -187,31 +124,8 @@
     </table>
 </div>
 
-<!-- ЧАСЫ -->
-<script>
-    function updateClock() {
-        const now = new Date();
-
-        const sec = now.getSeconds();
-        const min = now.getMinutes();
-        const hour = now.getHours();
-
-        document.getElementById("second").style.transform =
-            `translateX(-50%) rotate(${sec * 6}deg)`;
-
-        document.getElementById("minute").style.transform =
-            `translateX(-50%) rotate(${min * 6}deg)`;
-
-        document.getElementById("hour").style.transform =
-            `translateX(-50%) rotate(${(hour % 12) * 30 + min * 0.5}deg)`;
-
-        document.getElementById("date").innerText =
-            now.toLocaleDateString('ru-RU');
-    }
-
-    setInterval(updateClock, 1000);
-    updateClock();
-</script>
+<!-- 👉 подключаем JS часов -->
+<script th:src="@{/js/clock.js}"></script>
 
 </body>
 </html>
